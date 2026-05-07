@@ -1,0 +1,28 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables (sensitive!)
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Database locali (li aggiungeremo presto)
+*.db
+*.sqlite
+*.sqlite3
+
+# Upload utenti (per quando ci saranno)
+uploads/
