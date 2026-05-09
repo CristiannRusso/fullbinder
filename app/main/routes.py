@@ -1,12 +1,16 @@
-from flask import render_template
+from flask import render_template, redirect, url_for
+from flask_login import login_required, current_user
 from app.main import bp
 
 
 @bp.route("/")
-def home():
-    return render_template("main/home.html")
+def welcome():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return render_template("main/welcome.html")
 
 
-@bp.route("/about")
-def about():
-    return render_template("main/about.html")
+@bp.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("main/dashboard.html", user=current_user)

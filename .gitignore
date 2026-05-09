@@ -26,3 +26,9 @@ __pycache__/
 
 # Upload utenti (per quando ci saranno)
 uploads/
+
+# Flask instance folder (db, segreti)
+instance/
+
+# File caricati dagli utenti
+app/static/uploads/
