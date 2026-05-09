@@ -1176,6 +1176,7 @@ input {
   background: var(--bg-elev);
   color: var(--ink);
   cursor: pointer;
+  text-decoration: none;
   transition: background .12s, border-color .12s, transform .12s;
 }
 
@@ -1811,6 +1812,7 @@ input {
   align-items: center;
   gap: 10px;
   font: inherit;
+  text-decoration: none;
 }
 
 .auth-side-quote {

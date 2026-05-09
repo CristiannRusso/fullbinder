@@ -1,19 +1,19 @@
 # FullBinder
 
-FullBinder è una webapp pensata per raccogliere e organizzare documenti personali in un raccoglitore virtuale. 
+FullBinder is a web app designed to collect and organize personal documents in a virtual binder.
 
-## Stato del progetto
+## Current Status
 
-In sviluppo attivo - Fase 1
+Active Development
 
-## Stack tecnico
+## Tech Stack
 
 - **Backend:** Python 3.12 + Flask
 - **Database:** SQLite (con SQLAlchemy come ORM)
 - **Frontend:** HTML, CSS, JavaScript
-- **Versionamento:** Git + GitHub
+- **Versioning:** Git + GitHub
 
-## Setup locale
+## Local setup
 
 ```bash
 # Clona il repository
@@ -28,6 +28,6 @@ source .venv/bin/activate  # su Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Autore
+## Author
 
 Cristian Russo

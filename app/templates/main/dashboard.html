@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}FullBinder{% endblock %}
+
+{% block body %}
+<div class="fb-app">
+    <header class="fb-topbar">
+        <div class="fb-brand">
+            <div class="fb-brand-mark" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            <span class="fb-brand-name">FullBinder</span>
+        </div>
+
+        <div class="fb-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                stroke-linecap="round">
+                <circle cx="11" cy="11" r="6"></circle>
+                <path d="m20 20-3.5-3.5"></path>
+            </svg>
+            <input type="text" placeholder="Cerca tra tutti i raccoglitori…">
+            <kbd>⌘ K</kbd>
+        </div>
+
+        <div class="fb-topbar-right">
+            <button class="fb-icon-btn" id="theme-toggle" title="Cambia tema">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.4 1.4M16.6 16.6 18 18M6 18l1.4-1.4M16.6 7.4 18 6">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="fb-shell">
+        <aside class="fb-sidebar">
+            <div class="fb-side-section">
+                <div class="fb-side-head">Desk</div>
+                <button class="fb-side-row">
+                    <span class="fb-side-row-mark">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.6" stroke-linejoin="round">
+                            <rect x="4" y="6" width="16" height="13" rx="1"></rect>
+                            <path d="M4 10h16M9 6v13"></path>
+                        </svg>
+                    </span>
+                    <span class="fb-side-row-text">
+                        <span class="fb-side-row-label">All binders</span>
+                    </span>
+                    <span class="fb-side-row-count">{{ total_binders }}</span>
+                </button>
+                <button class="fb-side-row">
+                    <span class="fb-side-row-mark">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.6" stroke-linejoin="round">
+                            <rect x="4" y="6" width="16" height="13" rx="1"></rect>
+                            <path d="M4 10h16M9 6v13"></path>
+                        </svg>
+                    </span>
+                    <span class="fb-side-row-text">
+                        <span class="fb-side-row-label">All documents</span>
+                    </span>
+                    <span class="fb-side-row-count">{{ total_documents }}</span>
+                </button>
+            </div>
+
+            {% if binders_pinned %}
+            <div class="fb-side-section">
+                <div class="fb-side-head fb-side-head-row">
+                    <span>In evidenza</span>
+                </div>
+                {% for b in binders_pinned %}
+                <button class="fb-binder {% if binder_aperto and binder_aperto.id == b.id %}is-active{% endif %}">
+                    <span class="fb-binder-spine" style="background: {{ b.color }}"></span>
+                    <span class="fb-binder-text">
+                        <span class="fb-binder-name">{{ b.name }}</span>
+                        <span class="fb-binder-tag">{{ b.tag }}</span>
+                    </span>
+                    <span class="fb-binder-count">{{ b.documents.count() }}</span>
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="fb-side-section">
+                <div class="fb-side-head fb-side-head-row">
+                    <span>Raccoglitori</span>
+                    <a href="{{ url_for('main.new_binder') }}" class="fb-side-new" title="Nuovo raccoglitore">+</a>
+                </div>
+                {% for b in binders_normali %}
+                <button class="fb-binder {% if binder_aperto and binder_aperto.id == b.id %}is-active{% endif %}">
+                    <span class="fb-binder-spine" style="background: {{ b.color }}"></span>
+                    <span class="fb-binder-text">
+                        <span class="fb-binder-name">{{ b.name }}</span>
+                        <span class="fb-binder-tag">{{ b.tag }}</span>
+                    </span>
+                    <span class="fb-binder-count">{{ b.documents.count() }}</span>
+                </button>
+                {% endfor %}
+            </div>
+
+            <div class="fb-side-foot">
+                <div class="fb-foot-tag">v0.1 · locale</div>
+            </div>
+        </aside>
+
+        <main class="fb-main">
+            {% if binder_aperto %}
+            <div class="fb-mp-head">
+                <div class="fb-mp-head-l">
+                    <div class="fb-mp-eyebrow">
+                        <span class="fb-mp-spine" style="background: {{ binder_aperto.color }}"></span>
+                        Raccoglitore · {{ binder_aperto.tag }}
+                    </div>
+                    <h1 class="fb-mp-title">{{ binder_aperto.name }}</h1>
+                    <div class="fb-mp-sub">
+                        {{ binder_aperto.documents.count() }} documenti
+                    </div>
+                </div>
+                <div class="fb-mp-head-r">
+                    <div class="fb-seg">
+                        <button class="is-on">Recenti</button>
+                        <button>Nome</button>
+                        <button>Tipo</button>
+                    </div>
+                    <div class="fb-seg fb-seg-icon">
+                        <button class="is-on" title="Griglia">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.6">
+                                <rect x="4" y="4" width="7" height="7"></rect>
+                                <rect x="13" y="4" width="7" height="7"></rect>
+                                <rect x="4" y="13" width="7" height="7"></rect>
+                                <rect x="13" y="13" width="7" height="7"></rect>
+                            </svg>
+                        </button>
+                        <button title="Lista">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.6" stroke-linecap="round">
+                                <path d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fb-empty">
+                <div class="fb-empty-mark">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="fb-empty-title">Ancora vuoto</div>
+                <div class="fb-empty-body">
+                    Presto qui potrai caricare documenti.
+                    Per ora il raccoglitore è creato.
+                </div>
+            </div>
+            {% else %}
+            <div class="fb-empty" style="padding-top: 140px;">
+                <div class="fb-empty-mark">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="fb-empty-title">Inizia da qui</div>
+                <div class="fb-empty-body">
+                    Crea il tuo primo raccoglitore per cominciare a organizzare
+                    i tuoi documenti.
+                </div>
+                <a href="{{ url_for('main.new_binder') }}" class="fb-btn fb-btn-primary" style="margin-top: 24px;">
+                    Crea raccoglitore
+                </a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const html = document.documentElement;
+        const toggle = document.getElementById('theme-toggle');
+
+        const saved = localStorage.getItem('fb-theme');
+        if (saved === 'dark') {
+            html.dataset.theme = 'dark';
+        }
+
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                const isDark = html.dataset.theme === 'dark';
+                html.dataset.theme = isDark ? 'light' : 'dark';
+                localStorage.setItem('fb-theme', isDark ? 'light' : 'dark');
+            });
+        }
+    })();
+</script>
+{% endblock %}
