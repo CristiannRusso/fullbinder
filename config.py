@@ -2,6 +2,8 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+UPLOAD_FOLDER = os.path.join(basedir, "app", "static", "uploads")
+
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret-change-me"

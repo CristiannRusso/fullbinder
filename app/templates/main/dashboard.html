@@ -245,7 +245,42 @@
                         %}documents{% endif %}
                     </div>
                 </div>
+                <div class="fb-mp-head-r">
+                    <button class="fb-btn"
+                        onclick="openEditModal({{ open_binder.id }}, '{{ open_binder.name|e }}', '{{ open_binder.tag|e }}', '{{ open_binder.description|e }}', '{{ open_binder.color }}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        Edit
+                    </button>
+                    <button class="fb-btn fb-btn-danger"
+                        onclick="openDeleteModal({{ open_binder.id }}, '{{ open_binder.name|e }}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6M14 11v6"></path>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
             </div>
+
+            <form method="POST" action="{{ url_for('main.binder_upload', binder_id=open_binder.id) }}"
+                enctype="multipart/form-data" class="fb-upload">
+                <div class="fb-upload-spine" style="background: {{ open_binder.color }}"></div>
+                <div class="fb-upload-body">
+                    <div class="fb-upload-eyebrow">Upload documents</div>
+                    <div class="fb-upload-title">Add files to <em>{{ open_binder.name }}</em></div>
+                    <div class="fb-upload-sub">Select one or more files from your computer.</div>
+                </div>
+                <div class="fb-upload-actions">
+                    <input type="file" name="files" multiple required style="font-size: 13px;">
+                    <button type="submit" class="fb-btn fb-btn-primary">Upload</button>
+                </div>
+            </form>
 
             {% if documenti %}
             <div class="fb-doc-grid fb-layout-grid">
@@ -288,23 +323,149 @@
     </div>
 </div>
 
+{# ────── Modale Edit ────── #}
+<div class="fb-modal-overlay" id="edit-modal">
+    <div class="fb-modal">
+        <div class="fb-modal-head">
+            <div class="fb-modal-eyebrow">EDIT</div>
+            <h2 class="fb-modal-title">Edit binder</h2>
+            <p class="fb-modal-sub">Change name, category, color or description.</p>
+        </div>
+
+        <form method="POST" id="edit-form" class="auth-form">
+            <div class="auth-row">
+                <label class="auth-row-label" for="edit-nome">Name</label>
+                <input class="auth-input" type="text" id="edit-nome" name="nome" required maxlength="120">
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-row-label" for="edit-tag">Categoria</label>
+                <input class="auth-input" type="text" id="edit-tag" name="tag" maxlength="40">
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-row-label">Colore</label>
+                <div id="edit-colors" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#C44918" style="display: none;">
+                        <span class="color-swatch" data-color="#C44918"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C44918; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#2A4A6B" style="display: none;">
+                        <span class="color-swatch" data-color="#2A4A6B"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #2A4A6B; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#C99529" style="display: none;">
+                        <span class="color-swatch" data-color="#C99529"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C99529; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#6B3D5E" style="display: none;">
+                        <span class="color-swatch" data-color="#6B3D5E"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6B3D5E; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#6E8265" style="display: none;">
+                        <span class="color-swatch" data-color="#6E8265"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6E8265; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#4A4F58" style="display: none;">
+                        <span class="color-swatch" data-color="#4A4F58"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #4A4F58; outline-offset: 2px;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-row-label" for="edit-descrizione">Description</label>
+                <input class="auth-input" type="text" id="edit-descrizione" name="descrizione" maxlength="500">
+            </div>
+
+            <div class="fb-modal-actions">
+                <button type="button" class="fb-btn" onclick="closeModal('edit-modal')">Cancel</button>
+                <button type="submit" class="fb-btn fb-btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ────── Modale Delete ────── #}
+<div class="fb-modal-overlay" id="delete-modal">
+    <div class="fb-modal">
+        <div class="fb-modal-head">
+            <div class="fb-modal-eyebrow" style="color: #C44918;">DELETE</div>
+            <h2 class="fb-modal-title">Delete binder</h2>
+            <p class="fb-modal-sub">
+                You're going to delete <strong id="delete-binder-name"></strong> and all documents inside.
+                This action is irreversible.
+            </p>
+        </div>
+
+        <form method="POST" id="delete-form">
+            <div class="fb-modal-actions">
+                <button type="button" class="fb-btn" onclick="closeModal('delete-modal')">Cancel</button>
+                <button type="submit" class="fb-btn fb-btn-danger">Delete permanently</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-    (function () {
-        const html = document.documentElement;
-        const toggle = document.getElementById('theme-toggle');
+    function openEditModal(id, name, tag, description, color) {
+        const form = document.getElementById('edit-form');
+        form.action = '/binders/' + id + '/edit';
 
-        const saved = localStorage.getItem('fb-theme');
-        if (saved === 'dark') {
-            html.dataset.theme = 'dark';
-        }
+        document.getElementById('edit-nome').value = name;
+        document.getElementById('edit-tag').value = tag;
+        document.getElementById('edit-descrizione').value = description;
 
-        if (toggle) {
-            toggle.addEventListener('click', function () {
-                const isDark = html.dataset.theme === 'dark';
-                html.dataset.theme = isDark ? 'light' : 'dark';
-                localStorage.setItem('fb-theme', isDark ? 'light' : 'dark');
+        const radios = form.querySelectorAll('input[name="color"]');
+        radios.forEach(r => r.checked = (r.value === color));
+
+        const swatches = document.querySelectorAll('#edit-colors .color-swatch');
+        swatches.forEach(s => {
+            s.style.outline = (s.dataset.color === color) ? '2px solid var(--ink)' : 'none';
+        });
+
+        document.getElementById('edit-modal').classList.add('is-open');
+    }
+
+    function openDeleteModal(id, name) {
+        const form = document.getElementById('delete-form');
+        form.action = '/binders/' + id + '/delete';
+        document.getElementById('delete-binder-name').textContent = name;
+        document.getElementById('delete-modal').classList.add('is-open');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+    }
+
+    document.querySelectorAll('.fb-modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeModal(overlay.id);
+        });
+    });
+
+    document.querySelectorAll('#edit-colors label').forEach(label => {
+        label.addEventListener('click', function (e) {
+            const swatches = document.querySelectorAll('#edit-colors .color-swatch');
+            const radio = this.querySelector('input[type="radio"]');
+            swatches.forEach(s => s.style.outline = 'none');
+            this.querySelector('.color-swatch').style.outline = '2px solid var(--ink)';
+            radio.checked = true;
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.fb-modal-overlay.is-open').forEach(m => {
+                m.classList.remove('is-open');
             });
         }
-    })();
+    });
 </script>
 {% endblock %}
