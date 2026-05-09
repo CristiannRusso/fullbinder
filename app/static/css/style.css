@@ -207,6 +207,19 @@ input {
   border-color: var(--hairline);
 }
 
+.fb-icon-btn-2 {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-2);
+  border-radius: 8px;
+  background-color: var(--accent);
+  color: white;
+}
+
 .fb-avatar {
   width: 28px;
   height: 28px;
@@ -270,6 +283,7 @@ input {
   border-radius: 4px;
   font-size: 14px;
   line-height: 1;
+  text-decoration: none;
 }
 
 .fb-side-new:hover {
@@ -615,7 +629,7 @@ input {
   border: 1px solid var(--hairline);
   border-radius: 10px;
   overflow: hidden;
-  cursor: grab;
+  cursor: pointer;
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s;
   position: relative;
 }
@@ -826,7 +840,7 @@ input {
   align-items: center;
   padding: 12px 14px;
   border-bottom: 1px solid var(--hairline);
-  cursor: grab;
+  cursor: pointer;
   transition: background .12s;
 }
 

@@ -18,11 +18,18 @@
                 <circle cx="11" cy="11" r="6"></circle>
                 <path d="m20 20-3.5-3.5"></path>
             </svg>
-            <input type="text" placeholder="Cerca tra tutti i raccoglitori…">
+            <input type="text" placeholder="Search binders…">
             <kbd>⌘ K</kbd>
         </div>
 
         <div class="fb-topbar-right">
+            <a href="{{ url_for('main.new_binder') }}" class="fb-icon-btn-2" title="Nuovo raccoglitore">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+            </a>
             <button class="fb-icon-btn" id="theme-toggle" title="Cambia tema">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -38,7 +45,9 @@
         <aside class="fb-sidebar">
             <div class="fb-side-section">
                 <div class="fb-side-head">Desk</div>
-                <button class="fb-side-row">
+                <a href="{{ url_for('main.dashboard') }}"
+                    class="fb-side-row {% if view_mode == 'all_binders' %}is-active{% endif %}"
+                    style="text-decoration: none;">
                     <span class="fb-side-row-mark">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linejoin="round">
@@ -50,126 +59,231 @@
                         <span class="fb-side-row-label">All binders</span>
                     </span>
                     <span class="fb-side-row-count">{{ total_binders }}</span>
-                </button>
-                <button class="fb-side-row">
+                </a>
+                <a href="{{ url_for('main.all_documents') }}"
+                    class="fb-side-row {% if view_mode == 'all_documents' %}is-active{% endif %}"
+                    style="text-decoration: none;">
                     <span class="fb-side-row-mark">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linejoin="round">
-                            <rect x="4" y="6" width="16" height="13" rx="1"></rect>
-                            <path d="M4 10h16M9 6v13"></path>
+                            <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
                         </svg>
                     </span>
                     <span class="fb-side-row-text">
                         <span class="fb-side-row-label">All documents</span>
                     </span>
                     <span class="fb-side-row-count">{{ total_documents }}</span>
-                </button>
+                </a>
             </div>
 
             {% if binders_pinned %}
             <div class="fb-side-section">
                 <div class="fb-side-head fb-side-head-row">
-                    <span>In evidenza</span>
+                    <span>Pinned</span>
                 </div>
                 {% for b in binders_pinned %}
-                <button class="fb-binder {% if binder_aperto and binder_aperto.id == b.id %}is-active{% endif %}">
+                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
+                    class="fb-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}"
+                    style="text-decoration: none;">
                     <span class="fb-binder-spine" style="background: {{ b.color }}"></span>
                     <span class="fb-binder-text">
                         <span class="fb-binder-name">{{ b.name }}</span>
                         <span class="fb-binder-tag">{{ b.tag }}</span>
                     </span>
                     <span class="fb-binder-count">{{ b.documents.count() }}</span>
-                </button>
+                </a>
                 {% endfor %}
             </div>
             {% endif %}
 
             <div class="fb-side-section">
                 <div class="fb-side-head fb-side-head-row">
-                    <span>Raccoglitori</span>
-                    <a href="{{ url_for('main.new_binder') }}" class="fb-side-new" title="Nuovo raccoglitore">+</a>
+                    <span>Binders</span>
                 </div>
                 {% for b in binders_normali %}
-                <button class="fb-binder {% if binder_aperto and binder_aperto.id == b.id %}is-active{% endif %}">
+                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
+                    class="fb-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}"
+                    style="text-decoration: none;">
                     <span class="fb-binder-spine" style="background: {{ b.color }}"></span>
                     <span class="fb-binder-text">
                         <span class="fb-binder-name">{{ b.name }}</span>
                         <span class="fb-binder-tag">{{ b.tag }}</span>
                     </span>
                     <span class="fb-binder-count">{{ b.documents.count() }}</span>
-                </button>
+                </a>
                 {% endfor %}
             </div>
 
             <div class="fb-side-foot">
-                <div class="fb-foot-tag">v0.1 · locale</div>
+                <div class="fb-foot-tag">v0.1</div>
             </div>
         </aside>
 
         <main class="fb-main">
-            {% if binder_aperto %}
+
+            {% if view_mode == "all_binders" %}
+            {# ────── Vista 'Tutti i raccoglitori' ────── #}
             <div class="fb-mp-head">
                 <div class="fb-mp-head-l">
-                    <div class="fb-mp-eyebrow">
-                        <span class="fb-mp-spine" style="background: {{ binder_aperto.color }}"></span>
-                        Raccoglitore · {{ binder_aperto.tag }}
-                    </div>
-                    <h1 class="fb-mp-title">{{ binder_aperto.name }}</h1>
+                    <div class="fb-mp-eyebrow">Desk</div>
+                    <h1 class="fb-mp-title">All binders</h1>
                     <div class="fb-mp-sub">
-                        {{ binder_aperto.documents.count() }} documenti
-                    </div>
-                </div>
-                <div class="fb-mp-head-r">
-                    <div class="fb-seg">
-                        <button class="is-on">Recenti</button>
-                        <button>Nome</button>
-                        <button>Tipo</button>
-                    </div>
-                    <div class="fb-seg fb-seg-icon">
-                        <button class="is-on" title="Griglia">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.6">
-                                <rect x="4" y="4" width="7" height="7"></rect>
-                                <rect x="13" y="4" width="7" height="7"></rect>
-                                <rect x="4" y="13" width="7" height="7"></rect>
-                                <rect x="13" y="13" width="7" height="7"></rect>
-                            </svg>
-                        </button>
-                        <button title="Lista">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.6" stroke-linecap="round">
-                                <path d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                        </button>
+                        {{ total_binders }} {% if total_binders == 1 %}binder{% else %}binders{% endif %}
+                        ·
+                        {{ total_documents }} {% if total_documents == 1 %}document{% else %}documents{% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="fb-empty">
+            {% set tutti_binders = binders_pinned + binders_normali %}
+            {% if tutti_binders %}
+            <div class="fb-doc-grid fb-layout-grid">
+                {% for b in tutti_binders %}
+                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}" class="fb-doc"
+                    style="text-decoration: none; color: inherit;">
+                    <div class="fb-doc-cover">
+                        <div class="fb-doc-cover-stripe" style="background: {{ b.color }}"></div>
+                        <div class="fb-cover-art"
+                            style="position: absolute; inset: 0; padding: 18px 22px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div
+                                style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;">
+                                {{ b.tag }}
+                            </div>
+                            <div
+                                style="font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1.15; letter-spacing: -0.012em;">
+                                {{ b.name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fb-doc-body">
+                        <div class="fb-doc-meta">
+                            <span>{{ b.documents.count() }} {% if b.documents.count() == 1 %}document{% else
+                                %}documents{% endif %}</span>
+                            <span class="fb-doc-meta-dot">·</span>
+                            <span>{{ b.created_at.strftime("%d/%m/%Y") }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="fb-empty" style="padding-top: 80px;">
+                <div class="fb-empty-mark">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="fb-empty-title">Get started</div>
+                <div class="fb-empty-body">
+                    Create your first binder to start organizing your documents.
+                </div>
+                <a href="{{ url_for('main.new_binder') }}" class="fb-btn fb-btn-primary" style="margin-top: 24px;">
+                    Create binder
+                </a>
+            </div>
+            {% endif %}
+
+            {% elif view_mode == "all_documents" %}
+            {# ────── Vista 'Tutti i documenti' ────── #}
+            <div class="fb-mp-head">
+                <div class="fb-mp-head-l">
+                    <div class="fb-mp-eyebrow">Desk</div>
+                    <h1 class="fb-mp-title">All documents.</h1>
+                    <div class="fb-mp-sub">
+                        {{ documenti|length }} {% if documenti|length == 1 %}document{% else %}documents{% endif %} · {{
+                        total_binders }} {% if total_binders == 1 %}binder{% else %}binders{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if documenti %}
+            <div class="fb-doc-grid fb-layout-grid">
+                {% for d in documenti %}
+                <div class="fb-doc">
+                    <div class="fb-doc-cover">
+                        <div class="fb-doc-cover-stripe" style="background: {{ d.binder.color }}"></div>
+                        <div class="fb-doc-cover-glyph">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.6">
+                                <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+                            </svg>
+                        </div>
+                        <div class="fb-cover-art fb-cover-pdf"></div>
+                    </div>
+                    <div class="fb-doc-body">
+                        <div class="fb-doc-title">{{ d.original_name }}</div>
+                        <div class="fb-doc-meta">
+                            <span>{{ d.binder.name }}</span>
+                            <span class="fb-doc-meta-dot">·</span>
+                            <span>{{ d.uploaded_at.strftime("%d/%m/%Y") }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="fb-empty" style="padding-top: 80px;">
+                <div class="fb-empty-mark">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="fb-empty-title">No documents</div>
+                <div class="fb-empty-body">
+                    Open a binder to start uploading documents.
+                </div>
+            </div>
+            {% endif %}
+
+            {% elif view_mode == "binder" %}
+            {# ────── Vista singolo binder ────── #}
+            <div class="fb-mp-head">
+                <div class="fb-mp-head-l">
+                    <div class="fb-mp-eyebrow">
+                        <span class="fb-mp-spine" style="background: {{ open_binder.color }}"></span>
+                        Binder · {{ open_binder.tag }}
+                    </div>
+                    <h1 class="fb-mp-title">{{ open_binder.name }}</h1>
+                    <div class="fb-mp-sub">
+                        {{ open_binder.documents.count() }} {% if open_binder.documents.count() == 1 %}document{% else
+                        %}documents{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if documenti %}
+            <div class="fb-doc-grid fb-layout-grid">
+                {% for d in documenti %}
+                <div class="fb-doc">
+                    <div class="fb-doc-cover">
+                        <div class="fb-doc-cover-stripe" style="background: {{ open_binder.color }}"></div>
+                        <div class="fb-doc-cover-glyph">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.6">
+                                <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+                            </svg>
+                        </div>
+                        <div class="fb-cover-art fb-cover-pdf"></div>
+                    </div>
+                    <div class="fb-doc-body">
+                        <div class="fb-doc-title">{{ d.original_name }}</div>
+                        <div class="fb-doc-meta">
+                            <span>{{ d.uploaded_at.strftime("%d/%m/%Y") }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="fb-empty" style="padding-top: 80px;">
                 <div class="fb-empty-mark">
                     <span></span><span></span><span></span>
                 </div>
                 <div class="fb-empty-title">Ancora vuoto</div>
                 <div class="fb-empty-body">
                     Presto qui potrai caricare documenti.
-                    Per ora il raccoglitore è creato.
                 </div>
-            </div>
-            {% else %}
-            <div class="fb-empty" style="padding-top: 140px;">
-                <div class="fb-empty-mark">
-                    <span></span><span></span><span></span>
-                </div>
-                <div class="fb-empty-title">Inizia da qui</div>
-                <div class="fb-empty-body">
-                    Crea il tuo primo raccoglitore per cominciare a organizzare
-                    i tuoi documenti.
-                </div>
-                <a href="{{ url_for('main.new_binder') }}" class="fb-btn fb-btn-primary" style="margin-top: 24px;">
-                    Crea raccoglitore
-                </a>
             </div>
             {% endif %}
+
+            {% endif %}
+
         </main>
     </div>
 </div>

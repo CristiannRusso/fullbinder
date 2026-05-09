@@ -14,29 +14,56 @@ COLORI_BINDER = [
 ]
 
 
-@bp.route("/")
-def dashboard():
+def _sidebar_data():
+    """Dati comuni a tutte le viste della dashboard (sidebar)."""
     binders_pinned = Binder.query.filter_by(pinned=True).order_by(Binder.created_at.desc()).all()
     binders_normali = Binder.query.filter_by(pinned=False).order_by(Binder.created_at.desc()).all()
-    total_documents = Document.query.count()
     total_binders = Binder.query.count()
+    total_documents = Document.query.count()
+    return {
+        "binders_pinned": binders_pinned,
+        "binders_normali": binders_normali,
+        "total_binders": total_binders,
+        "total_documents": total_documents,
+    }
 
-    binder_aperto = None
-    tutti = binders_pinned + binders_normali
-    if tutti:
-        binder_aperto = tutti[0]
 
+@bp.route("/")
+def dashboard():
     return render_template(
         "main/dashboard.html",
-        binders_pinned=binders_pinned,
-        binders_normali=binders_normali,
-        total_documents=total_documents,
-        total_binders=total_binders,
-        binder_aperto=binder_aperto,
+        view_mode="all_binders",
+        open_binder=None,
+        **_sidebar_data(),
     )
 
 
-@bp.route("/new_binder", methods=["GET", "POST"])
+@bp.route("/documents")
+def all_documents():
+    documenti = Document.query.order_by(Document.uploaded_at.desc()).all()
+    return render_template(
+        "main/dashboard.html",
+        view_mode="all_documents",
+        open_binder=None,
+        documenti=documenti,
+        **_sidebar_data(),
+    )
+
+
+@bp.route("/binders/<int:binder_id>")
+def binder_view(binder_id):
+    binder = Binder.query.get_or_404(binder_id)
+    documenti = binder.documents.order_by(Document.uploaded_at.desc()).all()
+    return render_template(
+        "main/dashboard.html",
+        view_mode="binder",
+        open_binder=binder,
+        documenti=documenti,
+        **_sidebar_data(),
+    )
+
+
+@bp.route("/binders/new", methods=["GET", "POST"])
 def new_binder():
     if request.method == "POST":
         nome = request.form.get("nome", "").strip()
@@ -56,6 +83,6 @@ def new_binder():
         db.session.add(binder)
         db.session.commit()
 
-        return redirect(url_for("main.dashboard"))
+        return redirect(url_for("main.binder_view", binder_id=binder.id))
 
     return render_template("main/new_binder.html", colori=COLORI_BINDER)
