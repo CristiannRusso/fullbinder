@@ -247,7 +247,7 @@
                 </div>
                 <div class="fb-mp-head-r">
                     <button class="fb-btn"
-                        onclick="openEditModal({{ open_binder.id }}, '{{ open_binder.name|e }}', '{{ open_binder.tag|e }}', '{{ open_binder.description|e }}', '{{ open_binder.color }}')">
+                        onclick='openEditModal({{ open_binder.id }}, {{ open_binder.name|tojson }}, {{ open_binder.tag|tojson }}, {{ open_binder.description|tojson }}, {{ open_binder.color|tojson }})'>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 20h9"></path>
@@ -256,7 +256,7 @@
                         Edit
                     </button>
                     <button class="fb-btn fb-btn-danger"
-                        onclick="openDeleteModal({{ open_binder.id }}, '{{ open_binder.name|e }}')">
+                        onclick='openDeleteModal({{ open_binder.id }}, {{ open_binder.name|tojson }})'>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -414,6 +414,22 @@
 </div>
 
 <script>
+    const html = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+
+    const saved = localStorage.getItem('fb-theme');
+    if (saved === 'dark') {
+        html.dataset.theme = 'dark';
+    }
+
+    if (toggle) {
+        toggle.addEventListener('click', function () {
+            const isDark = html.dataset.theme === 'dark';
+            html.dataset.theme = isDark ? 'light' : 'dark';
+            localStorage.setItem('fb-theme', isDark ? 'light' : 'dark');
+        });
+    }
+
     function openEditModal(id, name, tag, description, color) {
         const form = document.getElementById('edit-form');
         form.action = '/binders/' + id + '/edit';
