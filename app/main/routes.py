@@ -66,29 +66,26 @@ def binder_view(binder_id):
     )
 
 
-@bp.route("/binders/new", methods=["GET", "POST"])
+@bp.route("/binders/new", methods=["POST"])
 def new_binder():
-    if request.method == "POST":
-        nome = request.form.get("nome", "").strip()
-        descrizione = request.form.get("descrizione", "").strip()
-        color = request.form.get("color", "#C44918")
-        tag = request.form.get("tag", "").strip() or "Generale"
+    nome = request.form.get("nome", "").strip()
+    descrizione = request.form.get("descrizione", "").strip()
+    color = request.form.get("color", "#C44918")
+    tag = request.form.get("tag", "").strip() or "Generale"
 
-        if not nome:
-            flash("Il nome del raccoglitore è obbligatorio.", "error")
-            return render_template("main/new_binder.html", colori=COLORI_BINDER)
+    if not nome:
+        flash("Il nome del raccoglitore è obbligatorio.", "error")
+        return redirect(url_for("main.dashboard"))
 
-        valori_color_validi = [c["hex"] for c in COLORI_BINDER]
-        if color not in valori_color_validi:
-            color = "#C44918"
+    valori_color_validi = [c["hex"] for c in COLORI_BINDER]
+    if color not in valori_color_validi:
+        color = "#C44918"
 
-        binder = Binder(name=nome, description=descrizione, color=color, tag=tag)
-        db.session.add(binder)
-        db.session.commit()
+    binder = Binder(name=nome, description=descrizione, color=color, tag=tag)
+    db.session.add(binder)
+    db.session.commit()
 
-        return redirect(url_for("main.binder_view", binder_id=binder.id))
-
-    return render_template("main/new_binder.html", colori=COLORI_BINDER)
+    return redirect(url_for("main.binder_view", binder_id=binder.id))
 
 @bp.route("/binders/<int:binder_id>/upload", methods=["POST"])
 def binder_upload(binder_id):

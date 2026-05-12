@@ -16,15 +16,15 @@ Active Development
 ## Local setup
 
 ```bash
-# Clona il repository
+# Clone the repository
 git clone https://github.com//fullbinder.git
 cd fullbinder
 
-# Crea e attiva il virtual environment
+# Create and activate the virtual environment
 python3 -m venv .venv
-source .venv/bin/activate  # su Windows: .venv\Scripts\activate
+source .venv/bin/activate  # on Windows: .venv\Scripts\activate
 
-# Installa le dipendenze
+# Install dependencies
 pip install -r requirements.txt
 ```
 

@@ -23,13 +23,13 @@
         </div>
 
         <div class="fb-topbar-right">
-            <a href="{{ url_for('main.new_binder') }}" class="fb-icon-btn-2" title="Nuovo raccoglitore">
+            <button class="fb-icon-btn-2" onclick="openCreateModal()" title="Nuovo raccoglitore">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 5v14"></path>
                     <path d="M5 12h14"></path>
                 </svg>
-            </a>
+            </button>
             <button class="fb-icon-btn" id="theme-toggle" title="Cambia tema">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -175,9 +175,9 @@
                 <div class="fb-empty-body">
                     Create your first binder to start organizing your documents.
                 </div>
-                <a href="{{ url_for('main.new_binder') }}" class="fb-btn fb-btn-primary" style="margin-top: 24px;">
+                <button onclick="openCreateModal()" class="fb-btn fb-btn-primary" style="margin-top: 24px;">
                     Create binder
-                </a>
+                </button>
             </div>
             {% endif %}
 
@@ -392,6 +392,78 @@
     </div>
 </div>
 
+{# ────── Modale Create ────── #}
+<div class="fb-modal-overlay" id="create-modal">
+    <div class="fb-modal">
+        <div class="fb-modal-head">
+            <div class="fb-modal-eyebrow">NEW</div>
+            <h2 class="fb-modal-title">Nuovo raccoglitore</h2>
+            <p class="fb-modal-sub">Dai un nome al raccoglitore, scegli un colore e una categoria.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('main.new_binder') }}" class="auth-form">
+            <div class="auth-row">
+                <label class="auth-row-label" for="create-nome">Name</label>
+                <input class="auth-input" type="text" id="create-nome" name="nome"
+                    placeholder="Università, Bollette 2026, Ricette…" required maxlength="120" autofocus>
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-row-label" for="create-tag">Categoria</label>
+                <input class="auth-input" type="text" id="create-tag" name="tag" placeholder="Studio, Casa, Vita…"
+                    maxlength="40">
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-row-label">Colore</label>
+                <div id="create-colors" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#C44918" checked style="display: none;">
+                        <span class="color-swatch" data-color="#C44918"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C44918; outline: 2px solid var(--ink); outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#2A4A6B" style="display: none;">
+                        <span class="color-swatch" data-color="#2A4A6B"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #2A4A6B; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#C99529" style="display: none;">
+                        <span class="color-swatch" data-color="#C99529"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C99529; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#6B3D5E" style="display: none;">
+                        <span class="color-swatch" data-color="#6B3D5E"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6B3D5E; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#6E8265" style="display: none;">
+                        <span class="color-swatch" data-color="#6E8265"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6E8265; outline-offset: 2px;"></span>
+                    </label>
+                    <label style="cursor: pointer;">
+                        <input type="radio" name="color" value="#4A4F58" style="display: none;">
+                        <span class="color-swatch" data-color="#4A4F58"
+                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #4A4F58; outline-offset: 2px;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="auth-row">
+                <label class="auth-row-label" for="create-descrizione">Description</label>
+                <input class="auth-input" type="text" id="create-descrizione" name="descrizione"
+                    placeholder="A cosa serve questo raccoglitore?" maxlength="500">
+            </div>
+
+            <div class="fb-modal-actions">
+                <button type="button" class="fb-btn" onclick="closeModal('create-modal')">Cancel</button>
+                <button type="submit" class="fb-btn fb-btn-primary">Crea</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {# ────── Modale Delete ────── #}
 <div class="fb-modal-overlay" id="delete-modal">
     <div class="fb-modal">
@@ -482,6 +554,20 @@
                 m.classList.remove('is-open');
             });
         }
+    });
+
+    function openCreateModal() {
+        document.getElementById('create-modal').classList.add('is-open');
+    }
+
+    document.querySelectorAll('#create-colors label').forEach(label => {
+        label.addEventListener('click', function () {
+            const swatches = document.querySelectorAll('#create-colors .color-swatch');
+            const radio = this.querySelector('input[type="radio"]');
+            swatches.forEach(s => s.style.outline = 'none');
+            this.querySelector('.color-swatch').style.outline = '2px solid var(--ink)';
+            radio.checked = true;
+        });
     });
 </script>
 {% endblock %}
