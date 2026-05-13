@@ -3,250 +3,249 @@
 {% block title %}FullBinder{% endblock %}
 
 {% block body %}
-<div class="fb-app">
-    <header class="fb-topbar">
-        <div class="fb-brand">
-            <div class="fb-brand-mark" aria-hidden="true">
-                <span></span><span></span><span></span>
-            </div>
-            <span class="fb-brand-name">FullBinder</span>
-        </div>
 
-        <div class="fb-search">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                stroke-linecap="round">
-                <circle cx="11" cy="11" r="6"></circle>
-                <path d="m20 20-3.5-3.5"></path>
+{# ────── Mesh di sfondo (blob animati) ────── #}
+<div class="fbg-mesh" aria-hidden="true">
+    <div class="fbg-mesh-blob"></div>
+    <div class="fbg-mesh-blob"></div>
+    <div class="fbg-mesh-blob"></div>
+    <div class="fbg-mesh-blob"></div>
+</div>
+<div class="fbg-grain" aria-hidden="true"></div>
+
+<div class="fbg-app">
+
+    {# ────── Rail (sidebar mini con icone) ────── #}
+    <aside class="fbg-rail" aria-label="Primary">
+
+        <a href="{{ url_for('main.dashboard') }}"
+        class="fbg-rail-link {% if view_mode == 'all_binders' %}is-active{% endif %}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="18" rx="1"></rect>
             </svg>
-            <input type="text" placeholder="Search binders…">
-            <kbd>⌘ K</kbd>
+            All binders
+            <span style="margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);">{{ total_binders }}</span>
+        </a>
+
+        <a href="{{ url_for('main.all_documents') }}"
+        class="fbg-rail-link {% if view_mode == 'all_documents' %}is-active{% endif %}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+            </svg>
+            All documents
+            <span style="margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);">{{ total_documents }}</span>
+        </a>
+
+        {% if binders_pinned %}
+        <div class="fbg-rail-section-head">
+            <span>Pinned</span>
         </div>
+        {% for b in binders_pinned %}
+            <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
+            class="fbg-rail-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}">
+                <span class="fbg-rail-binder-spine" style="background: {{ b.color }};"></span>
+                <span class="fbg-rail-binder-name">{{ b.name }}</span>
+                <span class="fbg-rail-binder-count">{{ b.documents.count() }}</span>
+            </a>
+        {% endfor %}
+        {% endif %}
 
-        <div class="fb-topbar-right">
-            <button class="fb-icon-btn-2" onclick="openCreateModal()" title="Nuovo raccoglitore">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 5v14"></path>
-                    <path d="M5 12h14"></path>
-                </svg>
-            </button>
-            <button class="fb-icon-btn" id="theme-toggle" title="Cambia tema">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.4 1.4M16.6 16.6 18 18M6 18l1.4-1.4M16.6 7.4 18 6">
-                    </path>
-                </svg>
-            </button>
+        <div class="fbg-rail-section-head">
+            <span>Binders</span>
         </div>
-    </header>
+        {% for b in binders_normali %}
+            <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
+            class="fbg-rail-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}">
+                <span class="fbg-rail-binder-spine" style="background: {{ b.color }};"></span>
+                <span class="fbg-rail-binder-name">{{ b.name }}</span>
+                <span class="fbg-rail-binder-count">{{ b.documents.count() }}</span>
+            </a>
+        {% endfor %}
+    </aside>
 
-    <div class="fb-shell">
-        <aside class="fb-sidebar">
-            <div class="fb-side-section">
-                <div class="fb-side-head">Desk</div>
-                <a href="{{ url_for('main.dashboard') }}"
-                    class="fb-side-row {% if view_mode == 'all_binders' %}is-active{% endif %}"
-                    style="text-decoration: none;">
-                    <span class="fb-side-row-mark">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.6" stroke-linejoin="round">
-                            <rect x="4" y="6" width="16" height="13" rx="1"></rect>
-                            <path d="M4 10h16M9 6v13"></path>
-                        </svg>
-                    </span>
-                    <span class="fb-side-row-text">
-                        <span class="fb-side-row-label">All binders</span>
-                    </span>
-                    <span class="fb-side-row-count">{{ total_binders }}</span>
-                </a>
-                <a href="{{ url_for('main.all_documents') }}"
-                    class="fb-side-row {% if view_mode == 'all_documents' %}is-active{% endif %}"
-                    style="text-decoration: none;">
-                    <span class="fb-side-row-mark">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.6" stroke-linejoin="round">
-                            <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
-                        </svg>
-                    </span>
-                    <span class="fb-side-row-text">
-                        <span class="fb-side-row-label">All documents</span>
-                    </span>
-                    <span class="fb-side-row-count">{{ total_documents }}</span>
-                </a>
+    {# ────── Canvas (header + page) ────── #}
+    <div class="fbg-canvas">
+
+        <header class="fbg-top">
+            <div class="fbg-crumbs">
+                <button class="fbg-crumb is-current">FullBinder</button>
             </div>
 
-            {% if binders_pinned %}
-            <div class="fb-side-section">
-                <div class="fb-side-head fb-side-head-row">
-                    <span>Pinned</span>
-                </div>
-                {% for b in binders_pinned %}
-                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
-                    class="fb-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}"
-                    style="text-decoration: none;">
-                    <span class="fb-binder-spine" style="background: {{ b.color }}"></span>
-                    <span class="fb-binder-text">
-                        <span class="fb-binder-name">{{ b.name }}</span>
-                        <span class="fb-binder-tag">{{ b.tag }}</span>
-                    </span>
-                    <span class="fb-binder-count">{{ b.documents.count() }}</span>
-                </a>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="fb-side-section">
-                <div class="fb-side-head fb-side-head-row">
-                    <span>Binders</span>
-                </div>
-                {% for b in binders_normali %}
-                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
-                    class="fb-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}"
-                    style="text-decoration: none;">
-                    <span class="fb-binder-spine" style="background: {{ b.color }}"></span>
-                    <span class="fb-binder-text">
-                        <span class="fb-binder-name">{{ b.name }}</span>
-                        <span class="fb-binder-tag">{{ b.tag }}</span>
-                    </span>
-                    <span class="fb-binder-count">{{ b.documents.count() }}</span>
-                </a>
-                {% endfor %}
+            <div class="fbg-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round">
+                    <circle cx="11" cy="11" r="6"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                </svg>
+                <input type="text" placeholder="Search binders, files, notes…">
+                <kbd class="fbg-kbd">⌘K</kbd>
             </div>
 
-            <div class="fb-side-foot">
-                <div class="fb-foot-tag">v0.1</div>
-            </div>
-        </aside>
-
-        <main class="fb-main">
-
-            {% if view_mode == "all_binders" %}
-            {# ────── Vista 'Tutti i raccoglitori' ────── #}
-            <div class="fb-mp-head">
-                <div class="fb-mp-head-l">
-                    <div class="fb-mp-eyebrow">Desk</div>
-                    <h1 class="fb-mp-title">All binders</h1>
-                    <div class="fb-mp-sub">
-                        {{ total_binders }} {% if total_binders == 1 %}binder{% else %}binders{% endif %}
-                        ·
-                        {{ total_documents }} {% if total_documents == 1 %}document{% else %}documents{% endif %}
-                    </div>
-                </div>
-            </div>
-
-            {% set tutti_binders = binders_pinned + binders_normali %}
-            {% if tutti_binders %}
-            <div class="fb-doc-grid fb-layout-grid">
-                {% for b in tutti_binders %}
-                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}" class="fb-doc"
-                    style="text-decoration: none; color: inherit;">
-                    <div class="fb-doc-cover">
-                        <div class="fb-doc-cover-stripe" style="background: {{ b.color }}"></div>
-                        <div class="fb-cover-art"
-                            style="position: absolute; inset: 0; padding: 18px 22px; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div
-                                style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;">
-                                {{ b.tag }}
-                            </div>
-                            <div
-                                style="font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1.15; letter-spacing: -0.012em;">
-                                {{ b.name }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="fb-doc-body">
-                        <div class="fb-doc-meta">
-                            <span>{{ b.documents.count() }} {% if b.documents.count() == 1 %}document{% else
-                                %}documents{% endif %}</span>
-                            <span class="fb-doc-meta-dot">·</span>
-                            <span>{{ b.created_at.strftime("%d/%m/%Y") }}</span>
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="fb-empty" style="padding-top: 80px;">
-                <div class="fb-empty-mark">
-                    <span></span><span></span><span></span>
-                </div>
-                <div class="fb-empty-title">Get started</div>
-                <div class="fb-empty-body">
-                    Create your first binder to start organizing your documents.
-                </div>
-                <button onclick="openCreateModal()" class="fb-btn fb-btn-primary" style="margin-top: 24px;">
-                    Create binder
+            <div class="fbg-top-r">
+                <button class="fbg-icon-btn" id="theme-toggle" title="Toggle theme">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path
+                            d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l1.4 1.4M16.6 16.6 18 18M6 18l1.4-1.4M16.6 7.4 18 6">
+                        </path>
+                    </svg>
                 </button>
             </div>
-            {% endif %}
+        </header>
 
-            {% elif view_mode == "all_documents" %}
-            {# ────── Vista 'Tutti i documenti' ────── #}
-            <div class="fb-mp-head">
-                <div class="fb-mp-head-l">
-                    <div class="fb-mp-eyebrow">Desk</div>
-                    <h1 class="fb-mp-title">All documents.</h1>
-                    <div class="fb-mp-sub">
-                        {{ documenti|length }} {% if documenti|length == 1 %}document{% else %}documents{% endif %} · {{
-                        total_binders }} {% if total_binders == 1 %}binder{% else %}binders{% endif %}
+        <main class="fbg-page">
+
+            {% if view_mode == "all_binders" %}
+            {# ────── Vista "All binders" ────── #}
+            <section class="fbg-hero">
+                <div class="fbg-hero-l">
+                    <div class="fbg-eyebrow">
+                        <span class="fbg-eyebrow-dot"></span>
+                        Welcome back
+                    </div>
+                    <h1 class="fbg-h1">Your binders</h1>
+                    <p class="fbg-h1-sub">
+                        Tap a binder to open it, or create a new one.
+                    </p>
+                </div>
+                <div class="fbg-stats">
+                    <div class="fbg-stat">
+                        <div class="fbg-stat-num">{{ total_binders }}</div>
+                        <div class="fbg-stat-lbl">binders</div>
+                    </div>
+                    <div class="fbg-stat">
+                        <div class="fbg-stat-num">{{ total_documents }}</div>
+                        <div class="fbg-stat-lbl">files</div>
                     </div>
                 </div>
+            </section>
+
+            {% set tutti_binders = binders_pinned + binders_normali %}
+            {% set tutti_tag = tutti_binders | map(attribute='tag') | unique | list %}
+
+            <div class="fbg-filters">
+                <button class="fbg-chip is-active" data-filter="all">All</button>
+                {% for tag in tutti_tag %}
+                <button class="fbg-chip" data-filter="{{ tag }}">{{ tag }}</button>
+                {% endfor %}
             </div>
 
+            <div class="fbg-grid">
+                <button class="fbg-binder fbg-binder-new" onclick="openCreateModal()">
+                    <div class="fbg-binder-new-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+                    </div>
+                    <div class="fbg-binder-new-title">Create new binder</div>
+                    <div class="fbg-binder-new-sub">Name it, pick a color, drop files in.</div>
+                </button>
+
+                {% for b in tutti_binders %}
+                <a href="{{ url_for('main.binder_view', binder_id=b.id) }}" class="fbg-binder" data-tag="{{ b.tag }}"
+                    style="--spine-glow: {{ b.color }}40;">
+                    <span class="fbg-binder-spine" style="background: {{ b.color }};"></span>
+                    <div class="fbg-binder-tag">
+                        <span class="fbg-binder-tag-dot" style="background: {{ b.color }};"></span>
+                        {{ b.tag }}
+                    </div>
+                    <h3 class="fbg-binder-name">{{ b.name }}</h3>
+                    <div class="fbg-binder-meta">
+                        Updated {{ b.created_at.strftime("%d/%m/%Y") }}
+                    </div>
+                    <div class="fbg-binder-foot">
+                        <span class="fbg-binder-count">
+                            {{ b.documents.count() }} <em>files</em>
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+
+            {% elif view_mode == "all_documents" %}
+            <section class="fbg-hero">
+                <div class="fbg-hero-l">
+                    <div class="fbg-eyebrow">
+                        <span class="fbg-eyebrow-dot"></span>
+                        Welcome back
+                    </div>
+                    <h1 class="fbg-h1">Your documents</h1>
+                    <p class="fbg-h1-sub">
+                        Upload documents in the binders.
+                    </p>
+                </div>
+                <div class="fbg-stats">
+                    <div class="fbg-stat">
+                        <div class="fbg-stat-num">{{ total_binders }}</div>
+                        <div class="fbg-stat-lbl">binders</div>
+                    </div>
+                    <div class="fbg-stat">
+                        <div class="fbg-stat-num">{{ total_documents }}</div>
+                        <div class="fbg-stat-lbl">files</div>
+                    </div>
+                </div>
+            </section>
+
+            {% set tutti_binders = binders_pinned + binders_normali %}
+            {% set tutti_tag = tutti_binders | map(attribute='tag') | unique | list %}
+
             {% if documenti %}
-            <div class="fb-doc-grid fb-layout-grid">
+            <div class="fbg-files">
                 {% for d in documenti %}
-                <div class="fb-doc">
-                    <div class="fb-doc-cover">
-                        <div class="fb-doc-cover-stripe" style="background: {{ d.binder.color }}"></div>
-                        <div class="fb-doc-cover-glyph">
+                <a href="{{ url_for('main.document_download', doc_id=d.id) }}" class="fbg-file"
+                    title="Download {{ d.original_name }}">
+                    <div class="fbg-file-cover">
+                        <div class="fbg-file-glyph">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="1.6">
                                 <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
                             </svg>
                         </div>
-                        <div class="fb-cover-art fb-cover-pdf"></div>
+                        <span class="fbg-file-kind">{{ (d.original_name.rsplit('.', 1)[1] if '.' in d.original_name else
+                            'FILE') | upper }}</span>
                     </div>
-                    <div class="fb-doc-body">
-                        <div class="fb-doc-title">{{ d.original_name }}</div>
-                        <div class="fb-doc-meta">
-                            <span>{{ d.binder.name }}</span>
-                            <span class="fb-doc-meta-dot">·</span>
-                            <span>{{ d.uploaded_at.strftime("%d/%m/%Y") }}</span>
-                        </div>
+                    <div class="fbg-file-body">
+                        <div class="fbg-file-title">{{ d.original_name }}</div>
+                        <div class="fbg-file-meta">{{ d.uploaded_at.strftime("%d/%m/%Y") }}</div>
                     </div>
-                </div>
+                </a>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="fb-empty" style="padding-top: 80px;">
-                <div class="fb-empty-mark">
-                    <span></span><span></span><span></span>
+            <div class="fbg-empty">
+                <div class="fbg-empty-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+                    </svg>
                 </div>
-                <div class="fb-empty-title">No documents</div>
-                <div class="fb-empty-body">
-                    Open a binder to start uploading documents.
+                <div class="fbg-empty-title">No documents</div>
+                <div class="fbg-empty-body">
+                    Upload files in the binders.
                 </div>
             </div>
             {% endif %}
 
             {% elif view_mode == "binder" %}
-            {# ────── Vista singolo binder ────── #}
-            <div class="fb-mp-head">
-                <div class="fb-mp-head-l">
-                    <div class="fb-mp-eyebrow">
-                        <span class="fb-mp-spine" style="background: {{ open_binder.color }}"></span>
+            {# ────── Vista "Singolo binder" ────── #}
+            <div class="fbg-detail-head">
+                <div class="fbg-detail-l">
+                    <div class="fbg-detail-eyebrow">
+                        <span class="fbg-detail-eyebrow-spine" style="background: {{ open_binder.color }};"></span>
                         Binder · {{ open_binder.tag }}
                     </div>
-                    <h1 class="fb-mp-title">{{ open_binder.name }}</h1>
-                    <div class="fb-mp-sub">
+                    <h1 class="fbg-h1">{{ open_binder.name }}</h1>
+                    <div class="fbg-h1-sub">
                         {{ open_binder.documents.count() }} {% if open_binder.documents.count() == 1 %}document{% else
                         %}documents{% endif %}
                     </div>
                 </div>
-                <div class="fb-mp-head-r">
-                    <button class="fb-btn"
+                <div class="fbg-detail-r">
+                    <button class="fbg-btn"
                         onclick='openEditModal({{ open_binder.id }}, {{ open_binder.name|tojson }}, {{ open_binder.tag|tojson }}, {{ open_binder.description|tojson }}, {{ open_binder.color|tojson }})'>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -255,7 +254,7 @@
                         </svg>
                         Edit
                     </button>
-                    <button class="fb-btn fb-btn-danger"
+                    <button class="fbg-btn-delete"
                         onclick='openDeleteModal({{ open_binder.id }}, {{ open_binder.name|tojson }})'>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -269,50 +268,56 @@
             </div>
 
             <form method="POST" action="{{ url_for('main.binder_upload', binder_id=open_binder.id) }}"
-                enctype="multipart/form-data" class="fb-upload">
-                <div class="fb-upload-spine" style="background: {{ open_binder.color }}"></div>
-                <div class="fb-upload-body">
-                    <div class="fb-upload-eyebrow">Upload documents</div>
-                    <div class="fb-upload-title">Add files to <em>{{ open_binder.name }}</em></div>
-                    <div class="fb-upload-sub">Select one or more files from your computer.</div>
+                enctype="multipart/form-data" class="fbg-upload">
+                <div class="fbg-upload-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
                 </div>
-                <div class="fb-upload-actions">
-                    <input type="file" name="files" multiple required style="font-size: 13px;">
-                    <button type="submit" class="fb-btn fb-btn-primary">Upload</button>
+                <div class="fbg-upload-text">
+                    <div class="fbg-upload-title">Upload to <em>{{ open_binder.name }}</em></div>
+                    <div class="fbg-upload-sub">Select one or more files from your computer.</div>
                 </div>
+                <input type="file" name="files" multiple required style="font-size: 13px;">
+                <button type="submit" class="fbg-btn fbg-btn-primary">Upload</button>
             </form>
 
             {% if documenti %}
-            <div class="fb-doc-grid fb-layout-grid">
+            <div class="fbg-files">
                 {% for d in documenti %}
-                <div class="fb-doc">
-                    <div class="fb-doc-cover">
-                        <div class="fb-doc-cover-stripe" style="background: {{ open_binder.color }}"></div>
-                        <div class="fb-doc-cover-glyph">
+                <a href="{{ url_for('main.document_download', doc_id=d.id) }}" class="fbg-file"
+                    title="Download {{ d.original_name }}">
+                    <div class="fbg-file-cover">
+                        <div class="fbg-file-glyph">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="1.6">
                                 <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
                             </svg>
                         </div>
-                        <div class="fb-cover-art fb-cover-pdf"></div>
+                        <span class="fbg-file-kind">{{ (d.original_name.rsplit('.', 1)[1] if '.' in d.original_name else
+                            'FILE') | upper }}</span>
                     </div>
-                    <div class="fb-doc-body">
-                        <div class="fb-doc-title">{{ d.original_name }}</div>
-                        <div class="fb-doc-meta">
-                            <span>{{ d.uploaded_at.strftime("%d/%m/%Y") }}</span>
-                        </div>
+                    <div class="fbg-file-body">
+                        <div class="fbg-file-title">{{ d.original_name }}</div>
+                        <div class="fbg-file-meta">{{ d.uploaded_at.strftime("%d/%m/%Y") }}</div>
                     </div>
-                </div>
+                </a>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="fb-empty" style="padding-top: 80px;">
-                <div class="fb-empty-mark">
-                    <span></span><span></span><span></span>
+            <div class="fbg-empty">
+                <div class="fbg-empty-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 3v5h5M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+                    </svg>
                 </div>
-                <div class="fb-empty-title">Ancora vuoto</div>
-                <div class="fb-empty-body">
-                    Presto qui potrai caricare documenti.
+                <div class="fbg-empty-title">Empty binder</div>
+                <div class="fbg-empty-body">
+                    Drop files into the upload zone above, or click to select.
                 </div>
             </div>
             {% endif %}
@@ -320,166 +325,193 @@
             {% endif %}
 
         </main>
+
     </div>
+
 </div>
 
-{# ────── Modale Edit ────── #}
-<div class="fb-modal-overlay" id="edit-modal">
-    <div class="fb-modal">
-        <div class="fb-modal-head">
-            <div class="fb-modal-eyebrow">EDIT</div>
-            <h2 class="fb-modal-title">Edit binder</h2>
-            <p class="fb-modal-sub">Change name, category, color or description.</p>
+{# ────── Modale CREATE ────── #}
+<div class="fbg-scrim" id="create-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'create-modal')">
+    <div class="fbg-modal" onclick="event.stopPropagation()">
+        <div class="fbg-modal-head">
+            <div>
+                <div class="fbg-modal-eyebrow">NEW BINDER</div>
+                <h2 class="fbg-modal-title">Create a new binder</h2>
+            </div>
+            <button class="fbg-modal-x" onclick="closeModal('create-modal')" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
 
-        <form method="POST" id="edit-form" class="auth-form">
-            <div class="auth-row">
-                <label class="auth-row-label" for="edit-nome">Name</label>
-                <input class="auth-input" type="text" id="edit-nome" name="nome" required maxlength="120">
-            </div>
+        <form method="POST" action="{{ url_for('main.new_binder') }}" id="create-form">
+            <div class="fbg-modal-body">
+                <div class="fbg-field">
+                    <label class="fbg-label" for="create-nome">
+                        Name
+                        <span class="fbg-label-hint">required</span>
+                    </label>
+                    <input class="fbg-input" type="text" id="create-nome" name="nome"
+                        placeholder="Università, Bollette 2026, Ricette…" required maxlength="120" autofocus>
+                </div>
 
-            <div class="auth-row">
-                <label class="auth-row-label" for="edit-tag">Categoria</label>
-                <input class="auth-input" type="text" id="edit-tag" name="tag" maxlength="40">
-            </div>
+                <div class="fbg-field">
+                    <label class="fbg-label" for="create-tag">Category</label>
+                    <input class="fbg-input" type="text" id="create-tag" name="tag" placeholder="Work, Life, Travel…"
+                        maxlength="40">
+                </div>
 
-            <div class="auth-row">
-                <label class="auth-row-label">Colore</label>
-                <div id="edit-colors" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#C44918" style="display: none;">
-                        <span class="color-swatch" data-color="#C44918"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C44918; outline-offset: 2px;"></span>
+                <div class="fbg-field">
+                    <label class="fbg-label">Color</label>
+                    <div class="fbg-swatches" id="create-swatches">
+                        <button type="button" class="fbg-swatch is-on" data-color="#3B5BDB"
+                            style="background: #3B5BDB;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#1C7ED6"
+                            style="background: #1C7ED6;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#0CA678"
+                            style="background: #0CA678;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#5C940D"
+                            style="background: #5C940D;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#F08C00"
+                            style="background: #F08C00;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#E8590C"
+                            style="background: #E8590C;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#C92A2A"
+                            style="background: #C92A2A;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#D6336C"
+                            style="background: #D6336C;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#7048E8"
+                            style="background: #7048E8;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#495057"
+                            style="background: #495057;"></button>
+                    </div>
+                    <input type="hidden" name="color" id="create-color" value="#3B5BDB">
+                </div>
+
+                <div class="fbg-field">
+                    <label class="fbg-label" for="create-descrizione">
+                        Description
+                        <span class="fbg-label-hint">optional</span>
                     </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#2A4A6B" style="display: none;">
-                        <span class="color-swatch" data-color="#2A4A6B"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #2A4A6B; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#C99529" style="display: none;">
-                        <span class="color-swatch" data-color="#C99529"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C99529; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#6B3D5E" style="display: none;">
-                        <span class="color-swatch" data-color="#6B3D5E"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6B3D5E; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#6E8265" style="display: none;">
-                        <span class="color-swatch" data-color="#6E8265"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6E8265; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#4A4F58" style="display: none;">
-                        <span class="color-swatch" data-color="#4A4F58"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #4A4F58; outline-offset: 2px;"></span>
-                    </label>
+                    <input class="fbg-input" type="text" id="create-descrizione" name="descrizione"
+                        placeholder="What is this binder for?" maxlength="500">
                 </div>
             </div>
 
-            <div class="auth-row">
-                <label class="auth-row-label" for="edit-descrizione">Description</label>
-                <input class="auth-input" type="text" id="edit-descrizione" name="descrizione" maxlength="500">
-            </div>
-
-            <div class="fb-modal-actions">
-                <button type="button" class="fb-btn" onclick="closeModal('edit-modal')">Cancel</button>
-                <button type="submit" class="fb-btn fb-btn-primary">Save</button>
+            <div class="fbg-modal-foot">
+                <div class="fbg-modal-foot-l">Press Esc to cancel</div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="fbg-btn fbg-btn-ghost"
+                        onclick="closeModal('create-modal')">Cancel</button>
+                    <button type="submit" class="fbg-btn fbg-btn-primary">Create binder</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-{# ────── Modale Create ────── #}
-<div class="fb-modal-overlay" id="create-modal">
-    <div class="fb-modal">
-        <div class="fb-modal-head">
-            <div class="fb-modal-eyebrow">NEW</div>
-            <h2 class="fb-modal-title">Nuovo raccoglitore</h2>
-            <p class="fb-modal-sub">Dai un nome al raccoglitore, scegli un colore e una categoria.</p>
+{# ────── Modale EDIT ────── #}
+<div class="fbg-scrim" id="edit-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'edit-modal')">
+    <div class="fbg-modal" onclick="event.stopPropagation()">
+        <div class="fbg-modal-head">
+            <div>
+                <div class="fbg-modal-eyebrow">EDIT BINDER</div>
+                <h2 class="fbg-modal-title">Edit binder</h2>
+            </div>
+            <button class="fbg-modal-x" onclick="closeModal('edit-modal')" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
         </div>
 
-        <form method="POST" action="{{ url_for('main.new_binder') }}" class="auth-form">
-            <div class="auth-row">
-                <label class="auth-row-label" for="create-nome">Name</label>
-                <input class="auth-input" type="text" id="create-nome" name="nome"
-                    placeholder="Università, Bollette 2026, Ricette…" required maxlength="120" autofocus>
-            </div>
+        <form method="POST" id="edit-form">
+            <div class="fbg-modal-body">
+                <div class="fbg-field">
+                    <label class="fbg-label" for="edit-nome">Name</label>
+                    <input class="fbg-input" type="text" id="edit-nome" name="nome" required maxlength="120">
+                </div>
 
-            <div class="auth-row">
-                <label class="auth-row-label" for="create-tag">Categoria</label>
-                <input class="auth-input" type="text" id="create-tag" name="tag" placeholder="Studio, Casa, Vita…"
-                    maxlength="40">
-            </div>
+                <div class="fbg-field">
+                    <label class="fbg-label" for="edit-tag">Category</label>
+                    <input class="fbg-input" type="text" id="edit-tag" name="tag" maxlength="40">
+                </div>
 
-            <div class="auth-row">
-                <label class="auth-row-label">Colore</label>
-                <div id="create-colors" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#C44918" checked style="display: none;">
-                        <span class="color-swatch" data-color="#C44918"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C44918; outline: 2px solid var(--ink); outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#2A4A6B" style="display: none;">
-                        <span class="color-swatch" data-color="#2A4A6B"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #2A4A6B; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#C99529" style="display: none;">
-                        <span class="color-swatch" data-color="#C99529"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #C99529; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#6B3D5E" style="display: none;">
-                        <span class="color-swatch" data-color="#6B3D5E"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6B3D5E; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#6E8265" style="display: none;">
-                        <span class="color-swatch" data-color="#6E8265"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #6E8265; outline-offset: 2px;"></span>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#4A4F58" style="display: none;">
-                        <span class="color-swatch" data-color="#4A4F58"
-                            style="display: block; width: 32px; height: 32px; border-radius: 6px; background: #4A4F58; outline-offset: 2px;"></span>
-                    </label>
+                <div class="fbg-field">
+                    <label class="fbg-label">Color</label>
+                    <div class="fbg-swatches" id="edit-swatches">
+                        <button type="button" class="fbg-swatch is-on" data-color="#3B5BDB"
+                            style="background: #3B5BDB;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#1C7ED6"
+                            style="background: #1C7ED6;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#0CA678"
+                            style="background: #0CA678;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#5C940D"
+                            style="background: #5C940D;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#F08C00"
+                            style="background: #F08C00;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#E8590C"
+                            style="background: #E8590C;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#C92A2A"
+                            style="background: #C92A2A;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#D6336C"
+                            style="background: #D6336C;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#7048E8"
+                            style="background: #7048E8;"></button>
+                        <button type="button" class="fbg-swatch" data-color="#495057"
+                            style="background: #495057;"></button>
+                    </div>
+                    <input type="hidden" name="color" id="edit-color">
+                </div>
+
+                <div class="fbg-field">
+                    <label class="fbg-label" for="edit-descrizione">Description</label>
+                    <input class="fbg-input" type="text" id="edit-descrizione" name="descrizione" maxlength="500">
                 </div>
             </div>
 
-            <div class="auth-row">
-                <label class="auth-row-label" for="create-descrizione">Description</label>
-                <input class="auth-input" type="text" id="create-descrizione" name="descrizione"
-                    placeholder="A cosa serve questo raccoglitore?" maxlength="500">
-            </div>
-
-            <div class="fb-modal-actions">
-                <button type="button" class="fb-btn" onclick="closeModal('create-modal')">Cancel</button>
-                <button type="submit" class="fb-btn fb-btn-primary">Crea</button>
+            <div class="fbg-modal-foot">
+                <div class="fbg-modal-foot-l">Press Esc to cancel</div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="fbg-btn fbg-btn-ghost"
+                        onclick="closeModal('edit-modal')">Cancel</button>
+                    <button type="submit" class="fbg-btn fbg-btn-primary">Save changes</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-{# ────── Modale Delete ────── #}
-<div class="fb-modal-overlay" id="delete-modal">
-    <div class="fb-modal">
-        <div class="fb-modal-head">
-            <div class="fb-modal-eyebrow" style="color: #C44918;">DELETE</div>
-            <h2 class="fb-modal-title">Delete binder</h2>
-            <p class="fb-modal-sub">
-                You're going to delete <strong id="delete-binder-name"></strong> and all documents inside.
-                This action is irreversible.
-            </p>
+{# ────── Modale DELETE ────── #}
+<div class="fbg-scrim" id="delete-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'delete-modal')">
+    <div class="fbg-modal" onclick="event.stopPropagation()" style="max-width: 420px;">
+        <div class="fbg-modal-head">
+            <div>
+                <div class="fbg-modal-eyebrow">DELETE BINDER</div>
+                <h2 class="fbg-modal-title">Delete this binder?</h2>
+            </div>
         </div>
 
         <form method="POST" id="delete-form">
-            <div class="fb-modal-actions">
-                <button type="button" class="fb-btn" onclick="closeModal('delete-modal')">Cancel</button>
-                <button type="submit" class="fb-btn fb-btn-danger">Delete permanently</button>
+            <div class="fbg-modal-body">
+                <p style="font-size: 13.5px; color: var(--ink-2); line-height: 1.5; margin: 0;">
+                    You're about to delete <strong id="delete-binder-name" style="color: var(--ink);"></strong>
+                    and all documents inside it. <strong>This action is irreversible.</strong>
+                </p>
+            </div>
+
+            <div class="fbg-modal-foot">
+                <div></div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="fbg-btn fbg-btn-ghost"
+                        onclick="closeModal('delete-modal')">Cancel</button>
+                    <button type="submit" class="fbg-btn"
+                        style="background-color: red; color: #fff; border-color: red;">Delete
+                        permanently</button>
+                </div>
             </div>
         </form>
     </div>
@@ -488,12 +520,8 @@
 <script>
     const html = document.documentElement;
     const toggle = document.getElementById('theme-toggle');
-
     const saved = localStorage.getItem('fb-theme');
-    if (saved === 'dark') {
-        html.dataset.theme = 'dark';
-    }
-
+    if (saved === 'dark') html.dataset.theme = 'dark';
     if (toggle) {
         toggle.addEventListener('click', function () {
             const isDark = html.dataset.theme === 'dark';
@@ -502,72 +530,72 @@
         });
     }
 
+    function openModal(id) {
+        document.getElementById(id).style.display = 'grid';
+    }
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+    function closeModalOnOverlay(event, id) {
+        if (event.target.id === id) closeModal(id);
+    }
+
+    function setupSwatches(containerId, hiddenInputId) {
+        const container = document.getElementById(containerId);
+        const hidden = document.getElementById(hiddenInputId);
+        if (!container || !hidden) return;
+        container.querySelectorAll('.fbg-swatch').forEach(sw => {
+            sw.addEventListener('click', function () {
+                container.querySelectorAll('.fbg-swatch').forEach(s => s.classList.remove('is-on'));
+                this.classList.add('is-on');
+                hidden.value = this.dataset.color;
+            });
+        });
+    }
+    setupSwatches('create-swatches', 'create-color');
+    setupSwatches('edit-swatches', 'edit-color');
+
+    function openCreateModal() {
+        document.getElementById('create-nome').value = '';
+        document.getElementById('create-tag').value = '';
+        document.getElementById('create-descrizione').value = '';
+        document.getElementById('create-color').value = '#3B5BDB';
+        const swatches = document.querySelectorAll('#create-swatches .fbg-swatch');
+        swatches.forEach((s, i) => s.classList.toggle('is-on', i === 0));
+        openModal('create-modal');
+        setTimeout(() => document.getElementById('create-nome').focus(), 50);
+    }
+
     function openEditModal(id, name, tag, description, color) {
         const form = document.getElementById('edit-form');
         form.action = '/binders/' + id + '/edit';
-
         document.getElementById('edit-nome').value = name;
         document.getElementById('edit-tag').value = tag;
         document.getElementById('edit-descrizione').value = description;
+        document.getElementById('edit-color').value = color;
 
-        const radios = form.querySelectorAll('input[name="color"]');
-        radios.forEach(r => r.checked = (r.value === color));
-
-        const swatches = document.querySelectorAll('#edit-colors .color-swatch');
+        const swatches = document.querySelectorAll('#edit-swatches .fbg-swatch');
         swatches.forEach(s => {
-            s.style.outline = (s.dataset.color === color) ? '2px solid var(--ink)' : 'none';
+            s.classList.toggle('is-on', s.dataset.color === color);
         });
-
-        document.getElementById('edit-modal').classList.add('is-open');
+        openModal('edit-modal');
     }
 
     function openDeleteModal(id, name) {
         const form = document.getElementById('delete-form');
         form.action = '/binders/' + id + '/delete';
         document.getElementById('delete-binder-name').textContent = name;
-        document.getElementById('delete-modal').classList.add('is-open');
+        openModal('delete-modal');
     }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('is-open');
-    }
-
-    document.querySelectorAll('.fb-modal-overlay').forEach(overlay => {
-        overlay.addEventListener('click', function (e) {
-            if (e.target === overlay) closeModal(overlay.id);
-        });
-    });
-
-    document.querySelectorAll('#edit-colors label').forEach(label => {
-        label.addEventListener('click', function (e) {
-            const swatches = document.querySelectorAll('#edit-colors .color-swatch');
-            const radio = this.querySelector('input[type="radio"]');
-            swatches.forEach(s => s.style.outline = 'none');
-            this.querySelector('.color-swatch').style.outline = '2px solid var(--ink)';
-            radio.checked = true;
-        });
-    });
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            document.querySelectorAll('.fb-modal-overlay.is-open').forEach(m => {
-                m.classList.remove('is-open');
+            ['create-modal', 'edit-modal', 'delete-modal'].forEach(id => {
+                const m = document.getElementById(id);
+                if (m && m.style.display !== 'none') closeModal(id);
             });
         }
     });
-
-    function openCreateModal() {
-        document.getElementById('create-modal').classList.add('is-open');
-    }
-
-    document.querySelectorAll('#create-colors label').forEach(label => {
-        label.addEventListener('click', function () {
-            const swatches = document.querySelectorAll('#create-colors .color-swatch');
-            const radio = this.querySelector('input[type="radio"]');
-            swatches.forEach(s => s.style.outline = 'none');
-            this.querySelector('.color-swatch').style.outline = '2px solid var(--ink)';
-            radio.checked = true;
-        });
-    });
 </script>
+
 {% endblock %}
