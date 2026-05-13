@@ -8,12 +8,15 @@ from app.models import Binder, Document
 
 
 COLORI_BINDER = [
-    {"hex": "#C44918", "nome": "Arancio"},
-    {"hex": "#2A4A6B", "nome": "Blu"},
-    {"hex": "#C99529", "nome": "Senape"},
-    {"hex": "#6B3D5E", "nome": "Prugna"},
-    {"hex": "#6E8265", "nome": "Salvia"},
-    {"hex": "#4A4F58", "nome": "Grafite"},
+    {"hex": "#3B5BDB", "nome": "Indigo"},
+    {"hex": "#1C7ED6", "nome": "Sky"},
+    {"hex": "#0CA678", "nome": "Teal"},
+    {"hex": "#5C940D", "nome": "Moss"},
+    {"hex": "#E8590C", "nome": "Pumpkin"},
+    {"hex": "#C92A2A", "nome": "Brick"},
+    {"hex": "#D6336C", "nome": "Rose"},
+    {"hex": "#7048E8", "nome": "Violet"},
+    {"hex": "#495057", "nome": "Slate"},
 ]
 
 
