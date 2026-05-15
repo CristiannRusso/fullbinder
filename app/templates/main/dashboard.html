@@ -37,29 +37,14 @@
             <span style="margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);">{{ total_documents }}</span>
         </a>
 
-        {% if binders_pinned %}
         <div class="fbg-rail-section-head">
-            <span>Pinned</span>
+            <span>Tags</span>
         </div>
-        {% for b in binders_pinned %}
-            <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
-            class="fbg-rail-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}">
-                <span class="fbg-rail-binder-spine" style="background: {{ b.color }};"></span>
-                <span class="fbg-rail-binder-name">{{ b.name }}</span>
-                <span class="fbg-rail-binder-count">{{ b.documents.count() }}</span>
-            </a>
-        {% endfor %}
-        {% endif %}
-
-        <div class="fbg-rail-section-head">
-            <span>Binders</span>
-        </div>
-        {% for b in binders_normali %}
-            <a href="{{ url_for('main.binder_view', binder_id=b.id) }}"
-            class="fbg-rail-binder {% if open_binder and open_binder.id == b.id %}is-active{% endif %}">
-                <span class="fbg-rail-binder-spine" style="background: {{ b.color }};"></span>
-                <span class="fbg-rail-binder-name">{{ b.name }}</span>
-                <span class="fbg-rail-binder-count">{{ b.documents.count() }}</span>
+        {% for t in normal_tags %}
+            <a href="{{ url_for('main.tag_view', name=t.name) }}"
+            class="fbg-rail-binder {% if open_tag and open_tag.name == t.name %}is-active{% endif %}">
+                <span class="fbg-rail-binder-spine" style="background: {{ t.color }};"></span>
+                <span class="fbg-rail-binder-name">{{ t.name }}</span>
             </a>
         {% endfor %}
     </aside>
@@ -83,6 +68,34 @@
             </div>
 
             <div class="fbg-top-r">
+                <div class="fbg-dropdown" id="plus-dropdown">
+                    <button class="fbg-icon-btn" id="plus-trigger" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+                    </button>
+
+                    <div class="fbg-dropdown-menu" id="plus-menu">
+                        <button class="fbg-dropdown-item" onclick="closeDropdown('plus-dropdown'); openCreateModal();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="18" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="18" rx="1"></rect>
+                            </svg>
+                            <span>New binder</span>
+                        </button>
+
+                        <button class="fbg-dropdown-item" onclick="closeDropdown('plus-dropdown'); openCreateTagModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                            </svg>
+                            <span>New tag</span>
+                        </button>
+                    </div>
+                </div>
                 <button class="fbg-icon-btn" id="theme-toggle" title="Toggle theme">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -122,7 +135,7 @@
                 </div>
             </section>
 
-            {% set tutti_binders = binders_pinned + binders_normali %}
+            {% set tutti_binders = pinned_binders + normal_binders %}
             {% set tutti_tag = tutti_binders | map(attribute='tag') | unique | list %}
 
             <div class="fbg-filters">
@@ -150,8 +163,8 @@
                     style="--spine-glow: {{ b.color }}40;">
                     <span class="fbg-binder-spine" style="background: {{ b.color }};"></span>
                     <div class="fbg-binder-tag">
-                        <span class="fbg-binder-tag-dot" style="background: {{ b.color }};"></span>
-                        {{ b.tag }}
+                        <span class="fbg-binder-tag-dot" style="background: {{ b.tag.color }};"></span>
+                        {{ b.tag.name }}
                     </div>
                     <h3 class="fbg-binder-name">{{ b.name }}</h3>
                     <div class="fbg-binder-meta">
@@ -190,7 +203,7 @@
                 </div>
             </section>
 
-            {% set tutti_binders = binders_pinned + binders_normali %}
+            {% set tutti_binders = pinned_binders + normal_binders %}
             {% set tutti_tag = tutti_binders | map(attribute='tag') | unique | list %}
 
             {% if documenti %}
@@ -245,8 +258,17 @@
                     </div>
                 </div>
                 <div class="fbg-detail-r">
+                    <button class="fbg-btn" onclick='openUploadModal({{ open_binder.id }})'>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Upload
+                    </button>
                     <button class="fbg-btn"
-                        onclick='openEditModal({{ open_binder.id }}, {{ open_binder.name|tojson }}, {{ open_binder.tag|tojson }}, {{ open_binder.description|tojson }}, {{ open_binder.color|tojson }})'>
+                        onclick='openEditModal({{ open_binder.id }}, {{ open_binder.name|tojson }}, {{ open_binder.tag.name|tojson }}, {{ open_binder.description|tojson }})'>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 20h9"></path>
@@ -266,24 +288,6 @@
                     </button>
                 </div>
             </div>
-
-            <form method="POST" action="{{ url_for('main.binder_upload', binder_id=open_binder.id) }}"
-                enctype="multipart/form-data" class="fbg-upload">
-                <div class="fbg-upload-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                </div>
-                <div class="fbg-upload-text">
-                    <div class="fbg-upload-title">Upload to <em>{{ open_binder.name }}</em></div>
-                    <div class="fbg-upload-sub">Select one or more files from your computer.</div>
-                </div>
-                <input type="file" name="files" multiple required style="font-size: 13px;">
-                <button type="submit" class="fbg-btn fbg-btn-primary">Upload</button>
-            </form>
 
             {% if documenti %}
             <div class="fbg-files">
@@ -330,7 +334,7 @@
 
 </div>
 
-{# ────── Modale CREATE ────── #}
+{# ────── CREATE Modal ────── #}
 <div class="fbg-scrim" id="create-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'create-modal')">
     <div class="fbg-modal" onclick="event.stopPropagation()">
         <div class="fbg-modal-head">
@@ -358,9 +362,60 @@
                 </div>
 
                 <div class="fbg-field">
-                    <label class="fbg-label" for="create-tag">Category</label>
-                    <input class="fbg-input" type="text" id="create-tag" name="tag" placeholder="Work, Life, Travel…"
-                        maxlength="40">
+                    <label class="fbg-label" for="create-tag">Tag</label>
+                    <select class="fbg-input" name="tag" id="create-tag" required>
+                        {% for t in normal_tags %}
+                            <option value="{{ t.name }}">{{ t.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="fbg-field">
+                    <label class="fbg-label" for="create-descrizione">
+                        Description
+                        <span class="fbg-label-hint">optional</span>
+                    </label>
+                    <input class="fbg-input" type="text" id="create-descrizione" name="descrizione"
+                        placeholder="What is this binder for?" maxlength="500">
+                </div>
+            </div>
+
+            <div class="fbg-modal-foot">
+                <div class="fbg-modal-foot-l">Press Esc to cancel</div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="fbg-btn fbg-btn-ghost"
+                        onclick="closeModal('create-modal')">Cancel</button>
+                    <button type="submit" class="fbg-btn fbg-btn-primary">Create binder</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{# ────── CREATE TAG Modal ────── #}
+<div class="fbg-scrim" id="create-tag-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'create-tag-modal')">
+    <div class="fbg-modal" onclick="event.stopPropagation()">
+        <div class="fbg-modal-head">
+            <div>
+                <div class="fbg-modal-eyebrow">CREATE TAG</div>
+                <h2 class="fbg-modal-title">Create tag</h2>
+            </div>
+            <button class="fbg-modal-x" onclick="closeModal('create-tag-modal')" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <form method="POST" id="create-tag-form" action="{{ url_for('main.new_tag') }}">
+            <div class="fbg-modal-body">
+                <div class="fbg-field">
+                    <label class="fbg-label" for="create-nome">
+                        Name
+                        <span class="fbg-label-hint">required</span>
+                    </label>
+                    <input class="fbg-input" type="text" id="create-nome-tag" name="nome-tag"
+                        placeholder="Work, Life, Travel..." required maxlength="120" autofocus>
                 </div>
 
                 <div class="fbg-field">
@@ -389,30 +444,65 @@
                     </div>
                     <input type="hidden" name="color" id="create-color" value="#3B5BDB">
                 </div>
-
-                <div class="fbg-field">
-                    <label class="fbg-label" for="create-descrizione">
-                        Description
-                        <span class="fbg-label-hint">optional</span>
-                    </label>
-                    <input class="fbg-input" type="text" id="create-descrizione" name="descrizione"
-                        placeholder="What is this binder for?" maxlength="500">
-                </div>
             </div>
 
             <div class="fbg-modal-foot">
                 <div class="fbg-modal-foot-l">Press Esc to cancel</div>
                 <div style="display: flex; gap: 8px;">
                     <button type="button" class="fbg-btn fbg-btn-ghost"
-                        onclick="closeModal('create-modal')">Cancel</button>
-                    <button type="submit" class="fbg-btn fbg-btn-primary">Create binder</button>
+                        onclick="closeModal('create-tag-modal')">Cancel</button>
+                    <button type="submit" class="fbg-btn fbg-btn-primary">Create tag</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+{# ────── UPLOAD Modal ────── #}
+<div class="fbg-scrim" id="upload-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'upload-modal')">
+    <div class="fbg-modal" onclick="event.stopPropagation()">
+        <div class="fbg-modal-head">
+            <div>
+                <div class="fbg-modal-eyebrow">UPLOAD FILES</div>
+                <h2 class="fbg-modal-title">Upload files</h2>
+            </div>
+            <button class="fbg-modal-x" onclick="closeModal('upload-modal')" title="Close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
 
-{# ────── Modale EDIT ────── #}
+        <form method="POST" id="upload-form" enctype="multipart/form-data">
+            <div class="fbg-modal-body">
+                <div class="fbg-dropzone" id="dropzone">
+                    <div class="fbg-dropzone-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="fbg-dropzone-title">Drop files here</div>
+                    <div class="fbg-dropzone-sub">or <span style="color: var(--accent); text-decoration: underline;">browse from computer</span></div>
+                    <input type="file" name="files" id="upload-input" multiple style="display: none;">
+                </div>
+
+                <div class="fbg-pending" id="upload-pending"></div>
+            </div>
+
+            <div class="fbg-modal-foot">
+                <div class="fbg-modal-foot-l" id="upload-summary">No files selected</div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="fbg-btn fbg-btn-ghost" onclick="closeModal('upload-modal')">Cancel</button>
+                    <button type="submit" class="fbg-btn fbg-btn-primary" id="upload-submit" disabled>Upload</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{# ────── EDIT Modal ────── #}
 <div class="fbg-scrim" id="edit-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'edit-modal')">
     <div class="fbg-modal" onclick="event.stopPropagation()">
         <div class="fbg-modal-head">
@@ -436,35 +526,12 @@
                 </div>
 
                 <div class="fbg-field">
-                    <label class="fbg-label" for="edit-tag">Category</label>
-                    <input class="fbg-input" type="text" id="edit-tag" name="tag" maxlength="40">
-                </div>
-
-                <div class="fbg-field">
-                    <label class="fbg-label">Color</label>
-                    <div class="fbg-swatches" id="edit-swatches">
-                        <button type="button" class="fbg-swatch is-on" data-color="#3B5BDB"
-                            style="background: #3B5BDB;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#1C7ED6"
-                            style="background: #1C7ED6;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#0CA678"
-                            style="background: #0CA678;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#5C940D"
-                            style="background: #5C940D;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#F08C00"
-                            style="background: #F08C00;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#E8590C"
-                            style="background: #E8590C;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#C92A2A"
-                            style="background: #C92A2A;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#D6336C"
-                            style="background: #D6336C;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#7048E8"
-                            style="background: #7048E8;"></button>
-                        <button type="button" class="fbg-swatch" data-color="#495057"
-                            style="background: #495057;"></button>
-                    </div>
-                    <input type="hidden" name="color" id="edit-color">
+                    <label class="fbg-label" for="edit-tag">Tag</label>
+                    <select class="fbg-input" name="tag" id="edit-tag" required>
+                        {% for t in normal_tags %}
+                            <option value="{{ t.name }}">{{ t.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="fbg-field">
@@ -485,7 +552,7 @@
     </div>
 </div>
 
-{# ────── Modale DELETE ────── #}
+{# ────── DELETE Modal ────── #}
 <div class="fbg-scrim" id="delete-modal" style="display: none;" onclick="closeModalOnOverlay(event, 'delete-modal')">
     <div class="fbg-modal" onclick="event.stopPropagation()" style="max-width: 420px;">
         <div class="fbg-modal-head">
@@ -517,85 +584,6 @@
     </div>
 </div>
 
-<script>
-    const html = document.documentElement;
-    const toggle = document.getElementById('theme-toggle');
-    const saved = localStorage.getItem('fb-theme');
-    if (saved === 'dark') html.dataset.theme = 'dark';
-    if (toggle) {
-        toggle.addEventListener('click', function () {
-            const isDark = html.dataset.theme === 'dark';
-            html.dataset.theme = isDark ? 'light' : 'dark';
-            localStorage.setItem('fb-theme', isDark ? 'light' : 'dark');
-        });
-    }
-
-    function openModal(id) {
-        document.getElementById(id).style.display = 'grid';
-    }
-    function closeModal(id) {
-        document.getElementById(id).style.display = 'none';
-    }
-    function closeModalOnOverlay(event, id) {
-        if (event.target.id === id) closeModal(id);
-    }
-
-    function setupSwatches(containerId, hiddenInputId) {
-        const container = document.getElementById(containerId);
-        const hidden = document.getElementById(hiddenInputId);
-        if (!container || !hidden) return;
-        container.querySelectorAll('.fbg-swatch').forEach(sw => {
-            sw.addEventListener('click', function () {
-                container.querySelectorAll('.fbg-swatch').forEach(s => s.classList.remove('is-on'));
-                this.classList.add('is-on');
-                hidden.value = this.dataset.color;
-            });
-        });
-    }
-    setupSwatches('create-swatches', 'create-color');
-    setupSwatches('edit-swatches', 'edit-color');
-
-    function openCreateModal() {
-        document.getElementById('create-nome').value = '';
-        document.getElementById('create-tag').value = '';
-        document.getElementById('create-descrizione').value = '';
-        document.getElementById('create-color').value = '#3B5BDB';
-        const swatches = document.querySelectorAll('#create-swatches .fbg-swatch');
-        swatches.forEach((s, i) => s.classList.toggle('is-on', i === 0));
-        openModal('create-modal');
-        setTimeout(() => document.getElementById('create-nome').focus(), 50);
-    }
-
-    function openEditModal(id, name, tag, description, color) {
-        const form = document.getElementById('edit-form');
-        form.action = '/binders/' + id + '/edit';
-        document.getElementById('edit-nome').value = name;
-        document.getElementById('edit-tag').value = tag;
-        document.getElementById('edit-descrizione').value = description;
-        document.getElementById('edit-color').value = color;
-
-        const swatches = document.querySelectorAll('#edit-swatches .fbg-swatch');
-        swatches.forEach(s => {
-            s.classList.toggle('is-on', s.dataset.color === color);
-        });
-        openModal('edit-modal');
-    }
-
-    function openDeleteModal(id, name) {
-        const form = document.getElementById('delete-form');
-        form.action = '/binders/' + id + '/delete';
-        document.getElementById('delete-binder-name').textContent = name;
-        openModal('delete-modal');
-    }
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            ['create-modal', 'edit-modal', 'delete-modal'].forEach(id => {
-                const m = document.getElementById(id);
-                if (m && m.style.display !== 'none') closeModal(id);
-            });
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 
 {% endblock %}

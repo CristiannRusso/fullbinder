@@ -1228,6 +1228,22 @@ textarea {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.fbg-select {
+  height: 42px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-edge);
+  border-radius: 10px;
+  font-size: 14.5px;
+  color: var(--ink);
+  outline: 0;
+  transition: border-color .14s, background .14s, box-shadow .14s;
+}
+
+[data-theme="dark"] .fbg-select {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .fbg-input:focus {
   border-color: var(--accent);
   background: var(--glass-bg-strong);
@@ -1637,4 +1653,114 @@ textarea {
   font-weight: 700;
   letter-spacing: -0.02em;
   box-shadow: 0 2px 8px rgba(78, 91, 255, 0.3);
+}
+
+/* ── Dropzone (drag & drop area) ──────────────────────────────────────── */
+.fbg-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 40px 24px;
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px dashed var(--hairline-strong);
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+[data-theme="dark"] .fbg-dropzone {
+    background: rgba(255, 255, 255, 0.03);
+}
+.fbg-dropzone:hover,
+.fbg-dropzone.is-hover {
+    background: var(--glass-bg-strong);
+    border-color: var(--accent);
+}
+
+.fbg-dropzone-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--glass-edge);
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+[data-theme="dark"] .fbg-dropzone-icon {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.fbg-dropzone-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.fbg-dropzone-sub {
+    font-size: 12.5px;
+    color: var(--ink-3);
+}
+
+/* ── Dropdown menu ─────────────────────────────────────────────────────── */
+.fbg-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.fbg-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 200px;
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: var(--glass-shadow);
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 90;
+}
+
+.fbg-dropdown.is-open .fbg-dropdown-menu {
+    display: flex;
+}
+
+.fbg-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: transparent;
+    border: 0;
+    color: var(--ink);
+    font-size: 13px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .12s;
+    width: 100%;
+}
+
+.fbg-dropdown-item:hover {
+    background: rgba(15, 18, 30, 0.05);
+}
+
+[data-theme="dark"] .fbg-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.fbg-dropdown-item svg {
+    color: var(--ink-3);
+    flex-shrink: 0;
+}
+
+.fbg-dropdown-sep {
+    height: 1px;
+    background: var(--hairline);
+    margin: 4px 6px;
 }

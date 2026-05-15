@@ -4,14 +4,15 @@ from flask import render_template, redirect, url_for, request, flash, current_ap
 from werkzeug.utils import secure_filename
 from app import db
 from app.main import bp
-from app.models import Binder, Document
+from app.models import Binder, Document, Tag
 
 
-COLORI_BINDER = [
+TAG_COLORS = [
     {"hex": "#3B5BDB", "nome": "Indigo"},
     {"hex": "#1C7ED6", "nome": "Sky"},
     {"hex": "#0CA678", "nome": "Teal"},
     {"hex": "#5C940D", "nome": "Moss"},
+    {"hex": "#F08C00", "nome": "Amber"},
     {"hex": "#E8590C", "nome": "Pumpkin"},
     {"hex": "#C92A2A", "nome": "Brick"},
     {"hex": "#D6336C", "nome": "Rose"},
@@ -22,15 +23,19 @@ COLORI_BINDER = [
 
 def _sidebar_data():
     """Dati comuni a tutte le viste della dashboard (sidebar)."""
-    binders_pinned = Binder.query.filter_by(pinned=True).order_by(Binder.created_at.desc()).all()
-    binders_normali = Binder.query.filter_by(pinned=False).order_by(Binder.created_at.desc()).all()
+    pinned_binders = Binder.query.filter_by(pinned=True).all()
+    normal_binders = Binder.query.filter_by(pinned=False).all()
+    normal_tags = Tag.query.all()
     total_binders = Binder.query.count()
     total_documents = Document.query.count()
+    total_tags = Tag.query.count()
     return {
-        "binders_pinned": binders_pinned,
-        "binders_normali": binders_normali,
+        "pinned_binders": pinned_binders,
+        "normal_binders": normal_binders,
+        "normal_tags": normal_tags,
         "total_binders": total_binders,
         "total_documents": total_documents,
+        "total_tags": total_tags,
     }
 
 
@@ -56,15 +61,13 @@ def all_documents():
     )
 
 
-@bp.route("/binders/<int:binder_id>")
-def binder_view(binder_id):
-    binder = Binder.query.get_or_404(binder_id)
-    documenti = binder.documents.order_by(Document.uploaded_at.desc()).all()
+@bp.route("/binders/<string:name>")
+def tag_view(name):
+    tag = Tag.query.get_or_404(name)
     return render_template(
         "main/dashboard.html",
-        view_mode="binder",
-        open_binder=binder,
-        documenti=documenti,
+        view_mode="tag",
+        open_tag=tag,
         **_sidebar_data(),
     )
 
@@ -77,18 +80,56 @@ def new_binder():
     tag = request.form.get("tag", "").strip() or "Generale"
 
     if not nome:
-        flash("Il nome del raccoglitore è obbligatorio.", "error")
+        flash("Name is required", "error")
         return redirect(url_for("main.dashboard"))
 
-    valori_color_validi = [c["hex"] for c in COLORI_BINDER]
-    if color not in valori_color_validi:
-        color = "#C44918"
+    tag_obj = Tag.query.filter_by(name=tag).first()
+    if not tag_obj:
+        flash(f"Il tag '{tag}' non esiste. Crealo prima.", "error")
+        return redirect(url_for("main.dashboard"))
 
-    binder = Binder(name=nome, description=descrizione, color=color, tag=tag)
+    binder = Binder(name=nome, description=descrizione, tag_name=tag)
     db.session.add(binder)
     db.session.commit()
 
     return redirect(url_for("main.binder_view", binder_id=binder.id))
+
+@bp.route("/tags/new", methods=["POST"])
+def new_tag():
+    name_tag = request.form.get("nome-tag").strip()
+    color = request.form.get("color", "#3B5BDB")
+
+    if not name_tag:
+        flash("Name is required", "error")
+        return redirect(url_for("main.dashboard"))
+    
+    tag_check = Tag.query.filter_by(name=name_tag).first()
+
+    if tag_check:
+        flash("Tag already exists", "error")
+        return redirect(url_for("main.dashboard"))
+    
+    valid_color = [c["hex"] for c in TAG_COLORS]
+    if color not in valid_color:
+        color = "#3B5BDB"
+
+    tag = Tag(name=name_tag, color=color)
+    db.session.add(tag)
+    db.session.commit()
+
+    return redirect(url_for("main.dashboard"))
+
+@bp.route("/binders/<int:binder_id>")
+def binder_view(binder_id):
+    binder = Binder.query.get_or_404(binder_id)
+    documenti = binder.documents.order_by(Document.uploaded_at.desc()).all()
+    return render_template(
+        "main/dashboard.html",
+        view_mode="binder",
+        open_binder=binder,
+        documenti=documenti,
+        **_sidebar_data(),
+    )
 
 @bp.route("/binders/<int:binder_id>/upload", methods=["POST"])
 def binder_upload(binder_id):
@@ -151,21 +192,20 @@ def binder_edit(binder_id):
 
     nome = request.form.get("nome", "").strip()
     descrizione = request.form.get("descrizione", "").strip()
-    color = request.form.get("color", binder.color)
-    tag = request.form.get("tag", "").strip() or "Generale"
+    tag = request.form.get("tag", "").strip()
 
     if not nome:
         flash("Il nome del raccoglitore è obbligatorio.", "error")
         return redirect(url_for("main.binder_view", binder_id=binder.id))
 
-    valori_color_validi = [c["hex"] for c in COLORI_BINDER]
-    if color not in valori_color_validi:
-        color = binder.color
+    tag_obj = Tag.query.filter_by(name=tag).first()
+    if not tag_obj:
+        flash(f"Il tag '{tag}' non esiste.", "error")
+        return redirect(url_for("main.binder_view", binder_id=binder.id))
 
     binder.name = nome
     binder.description = descrizione
-    binder.color = color
-    binder.tag = tag
+    binder.tag_name = tag
     db.session.commit()
 
     return redirect(url_for("main.binder_view", binder_id=binder.id))
